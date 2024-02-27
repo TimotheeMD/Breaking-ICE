@@ -162,7 +162,7 @@ ui <- grid_page(
     card_header("Settings"),
     card_body(
       selectInput(
-        inputId = "cut",
+        inputId = "trial",
         label = "Trial",
         choices = list(
           "CONTACT-02-PFS" = "CONTACT-02-PFS",
