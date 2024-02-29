@@ -180,7 +180,10 @@ ui <- fluidPage(
           #fluid = TRUE,
 
         sidebarPanel(
-          h3("Settings"),   "Change the parameters to see how it affects the survival analysis on the left",br(),
+          h3("Settings"),   
+          "Change the parameters to see how it affects the survival analysis on the left",br(),
+          # h4("Experimental arm"),
+          h4(div("Experimental arm", style = "color: #6699CC")),
           sliderInput(
             inputId = "time_start",
             label = "Start Time",
@@ -199,18 +202,36 @@ ui <- fluidPage(
           ),
           numericInput(
             inputId = "Eperc",
-            label = "Eperc",
+            label = "Censoring (%)",
             value = 15,
             max = 100
           ),
+          textInput("text", "Modelling type"),
+          #h4("Control arm"),
+          h4(div("Control arm", style = "color: red")),
+          sliderInput(
+            inputId = "time_start",
+            label = "Start Time",
+            min = 0,
+            max = ceiling(max(original$xyz$x)),
+            value = 0,
+            width = "100%"
+          ),
+          sliderInput(
+            inputId = "time_end",
+            label = "End Time",
+            min = 0,
+            max = ceiling(max(original$xyz$x)),
+            value = 3,
+            width = "100%"
+          ),
           numericInput(
             inputId = "Cperc",
-            label = "Cperc",
+            label = "Censoring (%)",
             value = 15,
             max = 100
-          )
-          #,
-          #textInput("text", "Text input:")
+          ),
+          textInput("text", "Modelling type")
         ),
 
         mainPanel(
@@ -301,7 +322,7 @@ server <- function(input, output) {
     palette =
       c("red", "#6699CC"),    # custom color palettes
     conf.int = FALSE,          # Add confidence interval
-    pval = TRUE,              # Add p-value
+    pval = FALSE,              # Add p-value
     risk.table = TRUE,        # Add risk table
     risk.table.col = "strata",  # Risk table color by groups
     legend.labs =
@@ -310,7 +331,7 @@ server <- function(input, output) {
     risk.table.height = 0.25, # Useful to change when you have multiple groups
     xlab = "Time in months",   # customize X axis label.
     break.time.by = 3,     # break X axis in time intervals by 3.
-    ggtheme = theme_bw(),      # Change ggplot2 theme theme_light(), 
+    ggtheme = theme_minimal(),      # Change ggplot2 theme theme_light(), 
     ncensor.plot = FALSE,      # plot the number of censored subjects at time t
     ncensor.plot.height = 0.25
   )
