@@ -64,8 +64,8 @@ getOriginal <- function(){
 original <- getOriginal()
 originalFit <- survfit(Surv(x,y)~z, data = original$xyz)
 
-newData <- function(startTime=0,
-                    endTime=3,
+newData <- function(time_frame_experimental=c(0,3),
+                    time_frame_control=c(0,3),
                     Eperc=15,
                     Cperc=15,
                     seed=123,
@@ -95,7 +95,7 @@ newData <- function(startTime=0,
   # Cperc <- 15 # Percentage of times to be changed
   
   # Subset rows with treat = 1 and time within [startTime, endTime]
-  subset_treat_1 <- newdata[newdata$treat == 1 & newdata$time >= startTime & newdata$time <= endTime,]
+  subset_treat_1 <- newdata[newdata$treat == 1 & newdata$time >= time_frame_experimental[1] & newdata$time <= time_frame_experimental[2],]
   
   # Further subset those with status = 0
   subset_treat_1_status_0 <- subset_treat_1[subset_treat_1$status == 0,]
@@ -110,10 +110,10 @@ newData <- function(startTime=0,
   subset_treat_1_status_0$status[rows_to_change] <- 1
   
   # Replace the original rows in newdata
-  newdata[newdata$treat == 1 & newdata$time >= startTime & newdata$time <= endTime & newdata$status == 0,] <- subset_treat_1_status_0
+  newdata[newdata$treat == 1 & newdata$time >= time_frame_experimental[1] & newdata$time <= time_frame_experimental[2] & newdata$status == 0,] <- subset_treat_1_status_0
   
   # Subset rows with treat = 0 and time within [startTime, endTime]
-  subset_treat_0 <- newdata[newdata$treat == 0 & newdata$time >= startTime & newdata$time <= endTime,]
+  subset_treat_0 <- newdata[newdata$treat == 0 & newdata$time >= time_frame_control[1] & newdata$time <= time_frame_control[2],]
   
   # Further subset those with status = 0
   subset_treat_0_status_0 <- subset_treat_0[subset_treat_0$status == 0,]
@@ -131,7 +131,7 @@ newData <- function(startTime=0,
   subset_treat_0_status_0$time[rows_to_change] <- longest_time
   
   # Replace the original rows in newdata
-  newdata[newdata$treat == 0 & newdata$time >= startTime & newdata$time <= endTime & newdata$status == 0,] <- subset_treat_0_status_0
+  newdata[newdata$treat == 0 & newdata$time >= time_frame_control[1] & newdata$time <= time_frame_control[2] & newdata$status == 0,] <- subset_treat_0_status_0
   
   ## the number of patients with data being change in each arm : 
   c_change
@@ -185,19 +185,11 @@ ui <- fluidPage(
           # h4("Experimental arm"),
           h4(div("Experimental arm", style = "color: #6699CC")),
           sliderInput(
-            inputId = "time_start",
-            label = "Start Time",
+            inputId = "time_frame_experimental",
+            label = "Time Frame",
             min = 0,
             max = ceiling(max(original$xyz$x)),
-            value = 0,
-            width = "100%"
-          ),
-          sliderInput(
-            inputId = "time_end",
-            label = "End Time",
-            min = 0,
-            max = ceiling(max(original$xyz$x)),
-            value = 3,
+            value = c(0,3),
             width = "100%"
           ),
           numericInput(
@@ -210,19 +202,11 @@ ui <- fluidPage(
           #h4("Control arm"),
           h4(div("Control arm", style = "color: red")),
           sliderInput(
-            inputId = "time_start",
-            label = "Start Time",
+            inputId = "time_frame_control",
+            label = "Time Frame",
             min = 0,
             max = ceiling(max(original$xyz$x)),
-            value = 0,
-            width = "100%"
-          ),
-          sliderInput(
-            inputId = "time_end",
-            label = "End Time",
-            min = 0,
-            max = ceiling(max(original$xyz$x)),
-            value = 3,
+            value = c(0,3),
             width = "100%"
           ),
           numericInput(
@@ -253,7 +237,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   newXYZ <- reactive({
-    newData(input$time_start,input$time_end, input$Eperc, input$Cperc)$xyz
+    newData(input$time_frame_experimental,input$time_frame_control, input$Eperc, input$Cperc)$xyz
   })
   newFit <- reactive({
     survfit(Surv(x,y)~z, data=newXYZ())
@@ -316,8 +300,8 @@ server <- function(input, output) {
 
 
   g <- ggsurvplot(
-    fit,
-    data = original$xyz,
+    newFit(),
+    data = newXYZ(),
     size = 1,                 # change line size
     palette =
       c("red", "#6699CC"),    # custom color palettes
