@@ -234,6 +234,12 @@ ui <- fluidPage(
       ),
 )
 
+simulateTest <- function(){
+  newXYZ <<- newData(c(0,3),c(0,3), 50,50)$xyz
+  newFit <<- survfit(Surv(x,y)~z, data=newXYZ)
+}
+
+
 server <- function(input, output) {
   
   newXYZ <- reactive({
@@ -294,23 +300,34 @@ server <- function(input, output) {
 
   output$plot <- renderPlot({
     
-    fit <- survfit(Surv(x,y)~z, data = original$xyz)
+    # fit <- survfit(Surv(x,y)~z, data = original$xyz)
+    
+    # fit <- survfit(Surv(x,y)~z+group, data = df)
+    # fit <- survfit(Surv(x,y)~z, data = df)
 
-    # ggsurvplot(fit, data = original$xyz)
+    df <- bind_rows(original=original$xyz, simulated=newXYZ(), .id='group')
 
-
-  g <- ggsurvplot(
-    newFit(),
-    data = newXYZ(),
+  # g <- ggsurvplot(
+    g <- ggsurvplot_combine(
+      fit = list(original=originalFit, simulated=newFit()),
+      data = df,
+      palette =
+        c("red", "#6699CC","orange", "green"),    # custom color palettes
+      legend.labs =
+        c("Docetaxel - Control", "Sotorasib - Experiment", 'simulated - control', 'simulated - Experiment'),
+      # originalFit,
+    # data = original$xyz,
+    # newFit(),
+    # data = newXYZ(),
     size = 1,                 # change line size
-    palette =
-      c("red", "#6699CC"),    # custom color palettes
+    # palette =
+    #   c("red", "#6699CC"),    # custom color palettes
     conf.int = FALSE,          # Add confidence interval
     pval = FALSE,              # Add p-value
     risk.table = TRUE,        # Add risk table
     risk.table.col = "strata",  # Risk table color by groups
-    legend.labs =
-      c("Docetaxel - Control", "Sotorasib - Experiment"),
+    # legend.labs =
+    #   c("Docetaxel - Control", "Sotorasib - Experiment"),
     # Change legend labels
     risk.table.height = 0.25, # Useful to change when you have multiple groups
     xlab = "Time in months",   # customize X axis label.
@@ -319,7 +336,7 @@ server <- function(input, output) {
     ncensor.plot = FALSE,      # plot the number of censored subjects at time t
     ncensor.plot.height = 0.25
   )
-  print(class(g))
+  
   print(g)
 
   })
