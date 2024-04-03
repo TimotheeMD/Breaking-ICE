@@ -9,7 +9,7 @@ library(survminer)
 # library(plotly)
 
 getOriginal <- function(){
-    
+  
   ## First step, go on digitilzese and for each arm (important, use 100 as the maximum in y axis), you export an csv files on your Desktop (EXP for the experimental arm, and CON for the control arm)
   
   ## first the experimental arm
@@ -48,7 +48,7 @@ getOriginal <- function(){
   ### the summary function allow to have the data of events, censoring, etc. 
   # summary(est_E_OS)
   # summary (est_C_OS)
-    
+  
   ## here you can create a KM curve based on the novel IPD data generated based on the data that have been digitilzed
   ## you can also recapitulate the Cox analysis. 
   surv_data<- rbind(est_E_OS$IPD, est_C_OS$IPD)
@@ -58,7 +58,7 @@ getOriginal <- function(){
   z <- surv_data$arm
   
   return(list(xyz=list(x=x,y=y,z=z), est_E_OS=est_E_OS, est_C_OS=est_C_OS))
-
+  
 }
 
 original <- getOriginal()
@@ -70,7 +70,7 @@ newData <- function(time_frame_experimental=c(0,3),
                     Cperc=15,
                     seed=123,
                     original=getOriginal()
-                    ){
+){
   newdata <- rbind(original$est_E_OS$IPD, original$est_C_OS$IPD)
   
   # Set the seed for reproducibility
@@ -155,83 +155,83 @@ newData <- function(time_frame_experimental=c(0,3),
 #     This website uses technology and content from the Outdooractive Platform.</a>",
 
 ui <- fluidPage(
-
+  
   titlePanel("Breaking ICE"),
-
-      box(
-        title="Trial Data",  br(),
-        selectInput(
-          inputId = "cut",
-          label = "Select a trial",
-          choices = list(
-            "CONTACT-02-PFS" = "CONTACT-02-PFS",
-            "CONTACT-02-OS" = "CONTACT-02-OS"
-          ),
-          selected = "CONTACT-02-PFS",
-          width = "100%"
-        ),
-        textInput("text", "Or load your own trial data:")
-      )
-        ,
-
-        sidebarLayout(
-
-          position = c("right"),
-          #fluid = TRUE,
-
-        sidebarPanel(
-          h3("Settings"),   
-          "Change the parameters to see how it affects the survival analysis on the left",br(),
-          # h4("Experimental arm"),
-          h4(div("Experimental arm", style = "color: #6699CC")),
-          sliderInput(
-            inputId = "time_frame_experimental",
-            label = "Time Frame",
-            min = 0,
-            max = ceiling(max(original$xyz$x)),
-            value = c(0,3),
-            width = "100%"
-          ),
-          numericInput(
-            inputId = "Eperc",
-            label = "Censoring (%)",
-            value = 15,
-            max = 100
-          ),
-          textInput("text", "Modelling type"),
-          #h4("Control arm"),
-          h4(div("Control arm", style = "color: red")),
-          sliderInput(
-            inputId = "time_frame_control",
-            label = "Time Frame",
-            min = 0,
-            max = ceiling(max(original$xyz$x)),
-            value = c(0,3),
-            width = "100%"
-          ),
-          numericInput(
-            inputId = "Cperc",
-            label = "Censoring (%)",
-            value = 15,
-            max = 100
-          ),
-          textInput("text", "Modelling type")
-        ),
-
-        mainPanel(
-          h3("KM curve"),
-          plotOutput("plot"),
-          # verbatimTextOutput("statistics")
-          box(
-            title="Results",  br(),
-            "exp(z):", textOutput("statistics_z"),
-            "p-level:", textOutput("statistics_plevel"),
-            "interval:", textOutput("statistics_interval")
-            # textInput("text", "Or load your own trial data:")
-          )
-        ),
-
+  
+  box(
+    title="Trial Data",  br(),
+    selectInput(
+      inputId = "cut",
+      label = "Select a trial",
+      choices = list(
+        "CONTACT-02-PFS" = "CONTACT-02-PFS",
+        "CONTACT-02-OS" = "CONTACT-02-OS"
       ),
+      selected = "CONTACT-02-PFS",
+      width = "100%"
+    ),
+    fileInput("user_trial", "Or load your own trial data:", accept = c(".csv", ".tsv")),
+  )
+  ,
+  
+  sidebarLayout(
+    
+    position = c("right"),
+    #fluid = TRUE,
+    
+    sidebarPanel(
+      h3("Settings"),   
+      "Change the parameters to see how it affects the survival analysis on the left",br(),
+      # h4("Experimental arm"),
+      h4(div("Experimental arm", style = "color: #6699CC")),
+      sliderInput(
+        inputId = "time_frame_experimental",
+        label = "Time Frame",
+        min = 0,
+        max = ceiling(max(original$xyz$x)),
+        value = c(0,3),
+        width = "100%"
+      ),
+      numericInput(
+        inputId = "Eperc",
+        label = "Censoring (%)",
+        value = 15,
+        max = 100
+      ),
+      textInput("text", "Modelling type"),
+      #h4("Control arm"),
+      h4(div("Control arm", style = "color: red")),
+      sliderInput(
+        inputId = "time_frame_control",
+        label = "Time Frame",
+        min = 0,
+        max = ceiling(max(original$xyz$x)),
+        value = c(0,3),
+        width = "100%"
+      ),
+      numericInput(
+        inputId = "Cperc",
+        label = "Censoring (%)",
+        value = 15,
+        max = 100
+      ),
+      textInput("text", "Modelling type")
+    ),
+    
+    mainPanel(
+      h3("KM curve"),
+      plotOutput("plot"),
+      # verbatimTextOutput("statistics")
+      box(
+        title="Results",  br(),
+        "exp(z):", textOutput("statistics_z"),
+        "p-level:", textOutput("statistics_plevel"),
+        "interval:", textOutput("statistics_interval")
+        # textInput("text", "Or load your own trial data:")
+      )
+    ),
+    
+  ),
 )
 
 simulateTest <- function(){
@@ -241,6 +241,17 @@ simulateTest <- function(){
 
 
 server <- function(input, output) {
+  
+  user_trial_data <- reactive({
+    req(input$user_trial)
+    
+    ext <- tools::file_ext(input$user_trial$name)
+    switch(ext,
+           csv = vroom::vroom(input$user_trial$datapath, delim = ","),
+           tsv = vroom::vroom(input$user_trial$datapath, delim = "\t"),
+           validate("Invalid file; Please upload a .csv or .tsv file")
+    )
+  })
   
   newXYZ <- reactive({
     newData(input$time_frame_experimental,input$time_frame_control, input$Eperc, input$Cperc)$xyz
@@ -253,7 +264,7 @@ server <- function(input, output) {
     s <- summary(fit)
     s
   })
-
+  
   # output$plot <- renderPlot({
   #   ##then Kaplan-Meier Curve
   #   # par(mar = c(1, 1, 1, 1), xaxs = "i", yaxs = "i")
@@ -283,8 +294,8 @@ server <- function(input, output) {
   # 
   # 
   # })
-
-
+  
+  
   newStatistics <- reactive({
     fit <- coxph(Surv(x,y)~z, data=newXYZ())
     s <- summary(fit)
@@ -297,17 +308,17 @@ server <- function(input, output) {
   output$statistics_z <- renderText({newStatistics()$z})
   output$statistics_plevel <- renderText({newStatistics()$plevel})
   output$statistics_interval <- renderText({newStatistics()$interval})
-
+  
   output$plot <- renderPlot({
     
     # fit <- survfit(Surv(x,y)~z, data = original$xyz)
     
     # fit <- survfit(Surv(x,y)~z+group, data = df)
     # fit <- survfit(Surv(x,y)~z, data = df)
-
+    
     df <- bind_rows(original=original$xyz, simulated=newXYZ(), .id='group')
-
-  # g <- ggsurvplot(
+    
+    # g <- ggsurvplot(
     g <- ggsurvplot_combine(
       fit = list(original=originalFit, simulated=newFit()),
       data = df,
@@ -316,31 +327,31 @@ server <- function(input, output) {
       legend.labs =
         c("Docetaxel - Control", "Sotorasib - Experiment", 'simulated - control', 'simulated - Experiment'),
       # originalFit,
-    # data = original$xyz,
-    # newFit(),
-    # data = newXYZ(),
-    size = 1,                 # change line size
-    # palette =
-    #   c("red", "#6699CC"),    # custom color palettes
-    conf.int = FALSE,          # Add confidence interval
-    pval = FALSE,              # Add p-value
-    risk.table = TRUE,        # Add risk table
-    risk.table.col = "strata",  # Risk table color by groups
-    # legend.labs =
-    #   c("Docetaxel - Control", "Sotorasib - Experiment"),
-    # Change legend labels
-    risk.table.height = 0.25, # Useful to change when you have multiple groups
-    xlab = "Time in months",   # customize X axis label.
-    break.time.by = 3,     # break X axis in time intervals by 3.
-    ggtheme = theme_minimal(),      # Change ggplot2 theme theme_light(), 
-    ncensor.plot = FALSE,      # plot the number of censored subjects at time t
-    ncensor.plot.height = 0.25
-  )
-  
-  print(g)
-
+      # data = original$xyz,
+      # newFit(),
+      # data = newXYZ(),
+      size = 1,                 # change line size
+      # palette =
+      #   c("red", "#6699CC"),    # custom color palettes
+      conf.int = FALSE,          # Add confidence interval
+      pval = FALSE,              # Add p-value
+      risk.table = TRUE,        # Add risk table
+      risk.table.col = "strata",  # Risk table color by groups
+      # legend.labs =
+      #   c("Docetaxel - Control", "Sotorasib - Experiment"),
+      # Change legend labels
+      risk.table.height = 0.25, # Useful to change when you have multiple groups
+      xlab = "Time in months",   # customize X axis label.
+      break.time.by = 3,     # break X axis in time intervals by 3.
+      ggtheme = theme_minimal(),      # Change ggplot2 theme theme_light(), 
+      ncensor.plot = FALSE,      # plot the number of censored subjects at time t
+      ncensor.plot.height = 0.25
+    )
+    
+    print(g)
+    
   })
-
+  
 }
 
 shinyApp(ui, server)
