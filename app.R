@@ -175,37 +175,7 @@ server <- function(input, output) {
     # fit <- survfit(Surv(x,y)~z+group, data = df)
     # fit <- survfit(Surv(x,y)~z, data = df)
     
-    df <- bind_rows(original=original$xyz, simulated=newXYZ(), .id='group')
-    
-    # g <- ggsurvplot(
-    g <- ggsurvplot_combine(
-      fit = list(original=originalFit, simulated=newFit()),
-      data = df,
-      palette =
-        c("red", "#6699CC","orange", "green"),    # custom color palettes
-      legend.labs =
-        c("Docetaxel - Control", "Sotorasib - Experiment", 'simulated - control', 'simulated - Experiment'),
-      # originalFit,
-      # data = original$xyz,
-      # newFit(),
-      # data = newXYZ(),
-      size = 1,                 # change line size
-      # palette =
-      #   c("red", "#6699CC"),    # custom color palettes
-      conf.int = FALSE,          # Add confidence interval
-      pval = FALSE,              # Add p-value
-      risk.table = TRUE,        # Add risk table
-      risk.table.col = "strata",  # Risk table color by groups
-      # legend.labs =
-      #   c("Docetaxel - Control", "Sotorasib - Experiment"),
-      # Change legend labels
-      risk.table.height = 0.25, # Useful to change when you have multiple groups
-      xlab = "Time in months",   # customize X axis label.
-      break.time.by = 3,     # break X axis in time intervals by 3.
-      ggtheme = theme_minimal(),      # Change ggplot2 theme theme_light(), 
-      ncensor.plot = FALSE,      # plot the number of censored subjects at time t
-      ncensor.plot.height = 0.25
-    )
+    g <- plotCurves(original, originalFit, newXYZ(), newFit())
     
     print(g)
     

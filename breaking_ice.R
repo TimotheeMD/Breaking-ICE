@@ -29,6 +29,10 @@ getOriginal <- function(){
   ## number at risk control arm 
   nrisk.C <- c(200,98,57,35,16,8,6,5,3,1,0)
   
+  return( processCurves(E, trisk, nrisk.E, C, nrisk.C) )
+}
+
+processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
   ## preprocess the data
   pre_E <- preprocess(dat=E, trisk=trisk, nrisk=nrisk.E, maxy=100)
   pre_C <- preprocess(dat=C, trisk=trisk, nrisk=nrisk.C, maxy=100)
@@ -54,7 +58,6 @@ getOriginal <- function(){
   z <- surv_data$arm
   
   return(list(xyz=list(x=x,y=y,z=z), est_E_OS=est_E_OS, est_C_OS=est_C_OS))
-  
 }
 
 original <- getOriginal()
@@ -141,3 +144,51 @@ newData <- function(time_frame_experimental=c(0,3),
   
   return( list(xyz=list(x=x,y=y,z=z)))
 }
+
+setOriginal <- function(excel_sheet){
+  
+}
+
+plotCurves <- function(original, originalFit, newXYZ, newFit) {
+  df <- bind_rows(original=original$xyz, simulated=newXYZ, .id='group')
+  
+  # g <- ggsurvplot(
+  g <- ggsurvplot_combine(
+    fit = list(original=originalFit, simulated=newFit),
+    data = df,
+    palette =
+      c("red", "#6699CC","orange", "green"),    # custom color palettes
+    legend.labs =
+      c("Docetaxel - Control", "Sotorasib - Experiment", 'simulated - control', 'simulated - Experiment'),
+    # originalFit,
+    # data = original$xyz,
+    # newFit(),
+    # data = newXYZ(),
+    size = 1,                 # change line size
+    # palette =
+    #   c("red", "#6699CC"),    # custom color palettes
+    conf.int = FALSE,          # Add confidence interval
+    pval = FALSE,              # Add p-value
+    risk.table = TRUE,        # Add risk table
+    risk.table.col = "strata",  # Risk table color by groups
+    # legend.labs =
+    #   c("Docetaxel - Control", "Sotorasib - Experiment"),
+    # Change legend labels
+    risk.table.height = 0.25, # Useful to change when you have multiple groups
+    xlab = "Time in months",   # customize X axis label.
+    break.time.by = 3,     # break X axis in time intervals by 3.
+    ggtheme = theme_minimal(),      # Change ggplot2 theme theme_light(), 
+    ncensor.plot = FALSE,      # plot the number of censored subjects at time t
+    ncensor.plot.height = 0.25
+  )
+}
+
+quickRun <- function(){
+  print("Quick Run")
+  newXYZ <- newData()
+  newFit <- survfit(Surv(x,y)~z, data=newXYZ$xyz)
+  plotCurves(original, originalFit, newXYZ, newFit)
+}
+
+## uncomment for quick development
+# print(quickRun())
