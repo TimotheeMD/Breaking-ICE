@@ -32,6 +32,17 @@ getOriginal <- function(){
   return( processCurves(E, trisk, nrisk.E, C, nrisk.C) )
 }
 
+readCurvesFromExcel <- function(filename){
+  sheets <- readxl::excel_sheets(filename)
+  times <- readxl::read_xlsx(filename, sheet='Times')
+  E <- readxl::read_xlsx(filename, sheet='EXP')
+  C <- readxl::read_xlsx(filename, sheet='CON')
+  
+  return( processCurves(E, times$trisk, times$nrisk.E, C, times$nrisk.C) )
+}
+
+# st <- readExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
+
 processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
   ## preprocess the data
   pre_E <- preprocess(dat=E, trisk=trisk, nrisk=nrisk.E, maxy=100)
@@ -60,7 +71,9 @@ processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
   return(list(xyz=list(x=x,y=y,z=z), est_E_OS=est_E_OS, est_C_OS=est_C_OS))
 }
 
-original <- getOriginal()
+# original <- getOriginal()
+original <- readCurvesFromExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
+
 originalFit <- survfit(Surv(x,y)~z, data = original$xyz)
 
 newData <- function(time_frame_experimental=c(0,3),
