@@ -158,10 +158,6 @@ newData <- function(time_frame_experimental=c(0,3),
   return( list(xyz=list(x=x,y=y,z=z)))
 }
 
-setOriginal <- function(excel_sheet){
-  
-}
-
 plotCurves <- function(original, originalFit, newXYZ, newFit) {
   df <- bind_rows(original=original$xyz, simulated=newXYZ, .id='group')
   

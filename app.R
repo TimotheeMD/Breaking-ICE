@@ -29,7 +29,7 @@ ui <- fluidPage(
       selected = "CONTACT-02-PFS",
       width = "100%"
     ),
-    fileInput("user_trial", "Or load your own trial data:", accept = c(".csv", ".tsv")),
+    fileInput("user_trial", "Or load your own trial data:", accept = c(".xlsx")),
   )
   ,
   
@@ -101,19 +101,27 @@ simulateTest <- function(){
 
 server <- function(input, output) {
   
-  user_trial_data <- reactive({
-    req(input$user_trial)
-    
-    ext <- tools::file_ext(input$user_trial$name)
-    switch(ext,
-           csv = vroom::vroom(input$user_trial$datapath, delim = ","),
-           tsv = vroom::vroom(input$user_trial$datapath, delim = "\t"),
-           validate("Invalid file; Please upload a .csv or .tsv file")
-    )
+  userTrialData <- reactive({
+    # do nothing if no file was uploaded
+    if(! shiny::isTruthy(input$user_trial)){
+      getOriginal()
+    }else{
+      # ext <- tools::file_ext(input$user_trial$name)
+      # switch(ext,
+      #        csv = vroom::vroom(input$user_trial$datapath, delim = ","),
+      #        tsv = vroom::vroom(input$user_trial$datapath, delim = "\t"),
+      #        validate("Invalid file; Please upload a .csv or .tsv file")
+      # )
+      readCurvesFromExcel(input$user_trial$datapath)
+    }
+  })
+  
+  userTrialFit <- reactive({
+    survfit(Surv(x,y)~z, data=userTrialData()$xyz)
   })
   
   newXYZ <- reactive({
-    newData(input$time_frame_experimental,input$time_frame_control, input$Eperc, input$Cperc)$xyz
+    newData(input$time_frame_experimental,input$time_frame_control, input$Eperc, input$Cperc, original=userTrialData())$xyz
   })
   newFit <- reactive({
     survfit(Surv(x,y)~z, data=newXYZ())
@@ -175,7 +183,7 @@ server <- function(input, output) {
     # fit <- survfit(Surv(x,y)~z+group, data = df)
     # fit <- survfit(Surv(x,y)~z, data = df)
     
-    g <- plotCurves(original, originalFit, newXYZ(), newFit())
+    g <- plotCurves(userTrialData(), userTrialFit(), newXYZ(), newFit())
     
     print(g)
     
