@@ -2,6 +2,7 @@ library(shiny)
 library(gridlayout)
 library(bslib)
 library(shinydashboard)
+library(DT)
 
 source("breaking_ice.R")
 
@@ -80,14 +81,21 @@ ui <- fluidPage(
     mainPanel(
       h3("KM curve"),
       plotOutput("plot"),
-      # verbatimTextOutput("statistics")
-      box(
-        title="Results",  br(),
-        "exp(z):", textOutput("statistics_z"),
-        "p-level:", textOutput("statistics_plevel"),
-        "interval:", textOutput("statistics_interval")
-        # textInput("text", "Or load your own trial data:")
-      )
+      # verbatimTextOutput("statistics"),
+      h3("Results"),
+      tags$style(HTML("
+        #metrics {
+          display: flex;
+          justify-content: center;
+        }
+      ")),
+      tableOutput("metrics")
+      #box(
+      #  title="Results",  br(),
+      #  "exp(z):", textOutput("statistics_z"),
+      #  "p-level:", textOutput("statistics_plevel"),
+      #  "interval:", textOutput("statistics_interval")
+      #)
     ),
     
   ),
@@ -172,10 +180,7 @@ server <- function(input, output) {
       interval=s$conf.int[3:4]
     )
   })
-  output$statistics_z <- renderText({newStatistics()$z})
-  output$statistics_plevel <- renderText({newStatistics()$plevel})
-  output$statistics_interval <- renderText({newStatistics()$interval})
-  
+
   output$plot <- renderPlot({
     
     # fit <- survfit(Surv(x,y)~z, data = original$xyz)
@@ -187,6 +192,14 @@ server <- function(input, output) {
     
     print(g)
     
+  })
+  
+  #output$statistics_z <- renderText({newStatistics()$z})
+  #output$statistics_plevel <- renderText({newStatistics()$plevel})
+  #output$statistics_interval <- renderText({newStatistics()$interval})
+  
+  output$metrics <- renderTable({
+    data.frame(z = newStatistics()$z, "p-value" = newStatistics()$plevel, "CI" = newStatistics()$interval)
   })
   
 }
