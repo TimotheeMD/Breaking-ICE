@@ -56,9 +56,12 @@ ui <- fluidPage(
         inputId = "Eperc",
         label = "Censoring (%)",
         value = 15,
+        min = 0,
         max = 100
       ),
-      textInput("text", "Modelling type"),
+      radioButtons("modelling_type_experimental", label = ("Modelling type"), 
+                  choices = list("Toxicity", "Disappointment"), 
+                  selected = "Toxicity"),
       #h4("Control arm"),
       h4(div("Control arm", style = "color: red")),
       sliderInput(
@@ -73,9 +76,12 @@ ui <- fluidPage(
         inputId = "Cperc",
         label = "Censoring (%)",
         value = 15,
+        min = 0,
         max = 100
       ),
-      textInput("text", "Modelling type")
+      radioButtons("modelling_type_control", label = ("Modelling type"), 
+                  choices = list("Toxicity", "Disappointment"), 
+                  selected = "Disappointment")
     ),
     
     mainPanel(
@@ -129,7 +135,12 @@ server <- function(input, output) {
   })
   
   newXYZ <- reactive({
-    newData(input$time_frame_experimental,input$time_frame_control, input$Eperc, input$Cperc, original=userTrialData())$xyz
+    newData(
+      input$time_frame_experimental,input$time_frame_control,
+      input$Eperc, input$Cperc,
+      modellingTypeExperimental=input$modelling_type_experimental, modellingTypeControl=input$modelling_type_control,
+      original=userTrialData()
+    )$xyz
   })
   newFit <- reactive({
     survfit(Surv(x,y)~z, data=newXYZ())
