@@ -210,7 +210,9 @@ server <- function(input, output) {
   #output$statistics_interval <- renderText({newStatistics()$interval})
   
   output$metrics <- renderTable({
-    data.frame(z = newStatistics()$z, "p-value" = newStatistics()$plevel, "CI" = newStatistics()$interval)
+    data.frame(z = newStatistics()$z, "p-value" = newStatistics()$plevel,
+               "CI Low" = newStatistics()$interval[1], "CI High" = newStatistics()$interval[2]
+               )
   })
   
 }
