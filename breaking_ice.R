@@ -76,20 +76,7 @@ original <- readCurvesFromExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
 
 originalFit <- survfit(Surv(x,y)~z, data = original$xyz)
 
-newData <- function(time_frame_experimental=c(0,3),
-                    time_frame_control=c(0,3),
-                    Eperc=15,
-                    Cperc=15,
-                    seed=123,
-                    original=getOriginal()
-){
-  newdata <- rbind(original$est_E_OS$IPD, original$est_C_OS$IPD)
-  
-  # Set the seed for reproducibility
-  if(!is.null(seed)){
-    set.seed(seed)
-  }
-  
+simulateToxicity <- function(newdata, time_frame, perc) {
   # Parameters for the experimental arm (censored for additional toxicity, more likely to present the event)
   # here we will take the censored patients from 0 to 3 months
   # then randomly pick a percentage of those (15%)
@@ -98,22 +85,14 @@ newData <- function(time_frame_experimental=c(0,3),
   # endTime <- 3 # end time
   # Eperc <- 15 # Percentage of "0" status to be changed to "1"
   
-  # Parameters for the control arm (censored for patient disappointement, less likely to present the event)
-  # here we will take the censored patients from 0 to 3 months
-  # then randomly pick a percentage of those (15%)
-  # and change the time of censoring to be the same as the last patient being censored in this arm
-  # startTime <- 0 # start time
-  # endTime <- 3 # end time
-  # Cperc <- 15 # Percentage of times to be changed
-  
   # Subset rows with treat = 1 and time within [startTime, endTime]
-  subset_treat_1 <- newdata[newdata$treat == 1 & newdata$time >= time_frame_experimental[1] & newdata$time <= time_frame_experimental[2],]
+  subset_treat_1 <- newdata[newdata$time >= time_frame[1] & newdata$time <= time_frame[2],]
   
   # Further subset those with status = 0
   subset_treat_1_status_0 <- subset_treat_1[subset_treat_1$status == 0,]
   
   # Calculate number of rows to change based on percentage
-  e_change <- round(nrow(subset_treat_1_status_0) * (Eperc / 100.0))
+  e_change <- round(nrow(subset_treat_1_status_0) * (perc / 100.0))
   
   # Randomly select rows to change
   rows_to_change <- sample(nrow(subset_treat_1_status_0), e_change)
@@ -122,19 +101,31 @@ newData <- function(time_frame_experimental=c(0,3),
   subset_treat_1_status_0$status[rows_to_change] <- 1
   
   # Replace the original rows in newdata
-  newdata[newdata$treat == 1 & newdata$time >= time_frame_experimental[1] & newdata$time <= time_frame_experimental[2] & newdata$status == 0,] <- subset_treat_1_status_0
+  newdata[newdata$time >= time_frame[1] & newdata$time <= time_frame[2] & newdata$status == 0,] <- subset_treat_1_status_0
+  
+  return(newdata)
+}
+
+simulateDisappointment <- function(newdata, time_frame, perc, filter_treat=0) {
+  # Parameters for the control arm (censored for patient disappointement, less likely to present the event)
+  # here we will take the censored patients from 0 to 3 months
+  # then randomly pick a percentage of those (15%)
+  # and change the time of censoring to be the same as the last patient being censored in this arm
+  # startTime <- 0 # start time
+  # endTime <- 3 # end time
+  # Cperc <- 15 # Percentage of times to be changed
   
   # Subset rows with treat = 0 and time within [startTime, endTime]
-  subset_treat_0 <- newdata[newdata$treat == 0 & newdata$time >= time_frame_control[1] & newdata$time <= time_frame_control[2],]
+  subset_treat_0 <- newdata[newdata$time >= time_frame[1] & newdata$time <= time_frame[2],]
   
   # Further subset those with status = 0
   subset_treat_0_status_0 <- subset_treat_0[subset_treat_0$status == 0,]
   
-  # Find the longest time among those with status = 0 and treat = 0
-  longest_time <- max(newdata$time[newdata$status == 0 & newdata$treat == 0])
-  
+  # Find the longest time among those with status = 0
+  longest_time <- max(newdata$time[newdata$status == 0])
+
   # Calculate number of rows to change based on percentage
-  c_change <- round(nrow(subset_treat_0_status_0) * (Cperc / 100.0))
+  c_change <- round(nrow(subset_treat_0_status_0) * (perc / 100.0))
   
   # Randomly select rows to change
   rows_to_change <- sample(nrow(subset_treat_0_status_0), c_change)
@@ -143,11 +134,46 @@ newData <- function(time_frame_experimental=c(0,3),
   subset_treat_0_status_0$time[rows_to_change] <- longest_time
   
   # Replace the original rows in newdata
-  newdata[newdata$treat == 0 & newdata$time >= time_frame_control[1] & newdata$time <= time_frame_control[2] & newdata$status == 0,] <- subset_treat_0_status_0
+  newdata[newdata$time >= time_frame[1] & newdata$time <= time_frame[2] & newdata$status == 0,] <- subset_treat_0_status_0
   
-  ## the number of patients with data being change in each arm : 
-  c_change
-  e_change
+  return(newdata)
+}
+
+simulate <- function(df, modellingType, ...){
+  if(modellingType == 'Toxicity'){
+    return( simulateToxicity(df, ...) )
+  }else if(modellingType == 'Disappointment'){
+    return( simulateDisappointment(df, ...) )
+  }else{
+    error(paste0('modellingType not known: ',modellingType,' - has to be "Toxicity" or "Disappointment"'))
+  }
+}
+
+
+newData <- function(time_frame_experimental=c(0,3),
+                    time_frame_control=c(0,3),
+                    Eperc=15,
+                    Cperc=15,
+                    modellingTypeExperimental='Toxicity',
+                    modellingTypeControl='Disappointment',
+                    seed=123,
+                    original=getOriginal()
+){
+
+  # Set the seed for reproducibility
+  if(!is.null(seed)){
+    set.seed(seed)
+  }
+  
+  newdata <- rbind(
+    simulate(original$est_E_OS$IPD, modellingTypeExperimental, time_frame_experimental, Eperc),
+    simulate(original$est_C_OS$IPD, modellingTypeControl, time_frame_control, Cperc)
+  )
+  
+  
+  # ## the number of patients with data being change in each arm : 
+  # c_change
+  # e_change
   
   #### SURVIVAL ANALYIS
   ##preparation
@@ -194,10 +220,16 @@ plotCurves <- function(original, originalFit, newXYZ, newFit) {
 
 quickRun <- function(){
   print("Quick Run")
-  newXYZ <- newData()
+  newXYZ <- newData(
+    modellingTypeExperimental = 'Disappointment',
+    modellingTypeControl = 'Toxicity',
+  )
   newFit <- survfit(Surv(x,y)~z, data=newXYZ$xyz)
   plotCurves(original, originalFit, newXYZ, newFit)
 }
 
 ## uncomment for quick development
 # print(quickRun())
+
+# (simulateToxicity(original$est_C_OS$IPD, time_frame=c(0,3), perc=90 )) %>% head
+
