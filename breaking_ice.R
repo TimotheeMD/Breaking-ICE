@@ -71,8 +71,8 @@ processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
   return(list(xyz=list(x=x,y=y,z=z), est_E_OS=est_E_OS, est_C_OS=est_C_OS))
 }
 
-# original <- getOriginal()
-original <- readCurvesFromExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
+original <- getOriginal()
+# original <- readCurvesFromExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
 
 originalFit <- survfit(Surv(x,y)~z, data = original$xyz)
 
