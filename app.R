@@ -2,7 +2,6 @@ library(shiny)
 library(gridlayout)
 library(bslib)
 library(shinydashboard)
-library(DT)
 
 source("breaking_ice.R")
 
