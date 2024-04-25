@@ -182,13 +182,16 @@ server <- function(input, output) {
   
   
   newStatistics <- reactive({
-    fit <- coxph(Surv(x,y)~z, data=newXYZ())
-    s <- summary(fit)
-    list(
-      z=s$coefficients[2],
-      plevel=s$coefficients[5],
-      interval=s$conf.int[3:4]
-    )
+    bind_rows(lapply(
+      list( Original=userTrialData()$xyz, Simulation=newXYZ()),
+      function(xyz){
+        fit <- coxph(Surv(x,y)~z, data=xyz)
+        s <- summary(fit)
+        data.frame(z = s$coefficients[2], "p-value" = s$coefficients[5],
+                   "CI Low" = s$conf.int[3], "CI High" = s$conf.int[4]
+        )
+      }
+    ), .id = "Model")
   })
 
   output$plot <- renderPlot({
@@ -209,9 +212,7 @@ server <- function(input, output) {
   #output$statistics_interval <- renderText({newStatistics()$interval})
   
   output$metrics <- renderTable({
-    data.frame(z = newStatistics()$z, "p-value" = newStatistics()$plevel,
-               "CI Low" = newStatistics()$interval[1], "CI High" = newStatistics()$interval[2]
-               )
+    newStatistics()
   })
   
 }
