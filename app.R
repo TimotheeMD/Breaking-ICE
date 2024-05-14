@@ -16,7 +16,9 @@ source("breaking_ice.R")
 ui <- fluidPage(
   
   titlePanel("Breaking ICE"),
-  
+
+  fluidRow( 
+    column (8, 
   box(
     title="Trial Data",  br(),
     selectInput(
@@ -30,16 +32,21 @@ ui <- fluidPage(
       width = "100%"
     ),
     fileInput("user_trial", "Or load your own trial data:", accept = c(".xlsx")),
-  )
+  ))
   ,
+     column (4, 
+  box(
+    title="Breaking-ICE",
+    "Informative",br(),
+    "Censoring",br(),
+    "Exploration",br(),
+  ))
+  ),
   
   sidebarLayout(
     
-    position = c("right"),
-    #fluid = TRUE,
-    
     sidebarPanel(
-      h3("Settings"),   
+      h3("Sensitivity analysis"),   
       "Change the parameters to see how it affects the survival analysis on the left",br(),
       # h4("Experimental arm"),
       h4(div("Experimental arm", style = "color: #6699CC")),
@@ -84,10 +91,10 @@ ui <- fluidPage(
     ),
     
     mainPanel(
-      h3("KM curve"),
+      h3("Reconstructed Kaplan-Meier Curves"),
       plotOutput("plot"),
       # verbatimTextOutput("statistics"),
-      h3("Results"),
+      h3("Statistical outputs (Cox)"),
       tags$style(HTML("
         #metrics {
           display: flex;
