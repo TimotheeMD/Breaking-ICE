@@ -190,11 +190,11 @@ server <- function(input, output) {
   
   newStatistics <- reactive({
     bind_rows(lapply(
-      list( Original=userTrialData()$xyz, Simulation=newXYZ()),
+      list( "From Original"=userTrialData()$xyz, "Sensitivity Analysis"=newXYZ()),
       function(xyz){
         fit <- coxph(Surv(x,y)~z, data=xyz)
         s <- summary(fit)
-        data.frame(z = s$coefficients[2], "p-value" = s$coefficients[5],
+        data.frame("HR" = s$coefficients[2], "p-value" = s$coefficients[5],
                    "CI Low" = s$conf.int[3], "CI High" = s$conf.int[4]
         )
       }
