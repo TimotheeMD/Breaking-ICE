@@ -7,13 +7,7 @@ source("breaking_ice.R")
 
 TEMPLATE_DOWNLOAD_URL='https://raw.githubusercontent.com/TimotheeMD/SWOG1801_reanalysis/main/CON.xlsx'
 
-# Define UI - version 0004
-
-# Adding an image - code from Maria
-# text_disclaimer_outdooractive = 
-#   c("<a href='//www.outdooractive.com' title='This website uses technology and content from the Outdooractive Platform.'>
-#     <img src='//res.oastatic.com/partner/outdooractive-black.png' alt='outdooractive' />
-#     This website uses technology and content from the Outdooractive Platform.</a>",
+# Define UI
 
 ui <- fluidPage(
   
