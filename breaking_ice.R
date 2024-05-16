@@ -198,7 +198,10 @@ newData <- function(time_frame_experimental=c(0,3),
   return( list(xyz=xyz))
 }
 
-plotCurves <- function(original, originalFit, newXYZ, newFit) {
+plotCurves <- function(original, originalFit, newXYZ, newFit, colours) {
+  if(missing(colours)){
+    colours <- c("#6699CC", "red", "green","orange")
+  }
   df <- bind_rows(original=original$xyz, simulated=newXYZ, .id='group')
   print(levels(df$z))
 
@@ -207,8 +210,8 @@ plotCurves <- function(original, originalFit, newXYZ, newFit) {
   g <- ggsurvplot_combine(
     fit = list(original=originalFit, simulated=newFit),
     data = df,
-    palette =
-      c("#6699CC", "red", "green","orange"),    # custom color palettes
+    palette = colours,
+      # c("#6699CC", "red", "green","orange"),    # custom color palettes
     legend.labs =
       c("Original - Experiment", "Original - Control", 'Simulated - Experiment', 'Simulated - Control'),
     # palette =

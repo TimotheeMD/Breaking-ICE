@@ -2,6 +2,7 @@ library(shiny)
 library(gridlayout)
 library(bslib)
 library(shinydashboard)
+library(colourpicker)
 
 source("breaking_ice.R")
 
@@ -92,7 +93,22 @@ ui <- fluidPage(
       radioButtons("modelling_type_control", label = ("Modelling type"), 
                   choices = list("Toxicity", "Disappointment"), 
                   selected = "Disappointment"),
-      actionButton("doReset", "Reset All Parameters")
+      actionButton("doReset", "Reset All Parameters"),
+
+      h3("Colours"),
+      # palette =
+      #   c("#6699CC", "red", "green","orange"),    # custom color palettes
+      # legend.labs =
+      #   c("Original - Experiment", "Original - Control", 'Simulated - Experiment', 'Simulated - Control'),
+      fluidRow(
+        column(6,
+          colourInput("col_original_exp", "Original - Experiment", "#6699CC", allowTransparent=TRUE, closeOnClick=TRUE),
+          colourInput("col_simulated_exp", "Simulated - Experiment", "green", allowTransparent=TRUE, closeOnClick=TRUE),
+        ),
+        column(6,
+          colourInput("col_original_con", "Original - Control", "red", allowTransparent=TRUE, closeOnClick=TRUE),
+          colourInput("col_simulated_con", "Simulated - Control", "orange", allowTransparent=TRUE, closeOnClick=TRUE),
+      ))
     ),
     
     mainPanel(
@@ -208,7 +224,9 @@ server <- function(input, output, session) {
     # fit <- survfit(Surv(x,y)~z+group, data = df)
     # fit <- survfit(Surv(x,y)~z, data = df)
     
-    g <- plotCurves(userTrialData(), userTrialFit(), newXYZ(), newFit())
+    g <- plotCurves(userTrialData(), userTrialFit(), newXYZ(), newFit(),
+            colours=c(input$col_original_exp, input$col_original_con, input$col_simulated_exp, input$col_simulated_con)
+            )
     
     print(g)
     
