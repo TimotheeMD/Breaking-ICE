@@ -87,7 +87,8 @@ ui <- fluidPage(
       ),
       radioButtons("modelling_type_control", label = ("Modelling type"), 
                   choices = list("Toxicity", "Disappointment"), 
-                  selected = "Disappointment")
+                  selected = "Disappointment"),
+      actionButton("doReset", "Reset All Parameters")
     ),
     
     mainPanel(
@@ -119,7 +120,7 @@ simulateTest <- function(){
 }
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   userTrialData <- reactive({
     # do nothing if no file was uploaded
@@ -220,6 +221,16 @@ server <- function(input, output) {
   
   output$metrics <- renderTable({
     newStatistics()
+  })
+  
+  observeEvent(input$doReset, {
+    print("resetting")
+    updateSliderInput(session, "time_frame_experimental", value=c(0,3))
+    updateNumericInput(session, "Eperc", value=15)
+    updateRadioButtons(session, "modelling_type_experimental", selected="Toxicity")
+    updateSliderInput(session, "time_frame_control", value=c(0,3))
+    updateNumericInput(session, "Cperc", value=15)
+    updateRadioButtons(session, "modelling_type_control", selected="Disappointment")
   })
   
 }
