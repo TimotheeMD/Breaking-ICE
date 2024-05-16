@@ -5,6 +5,8 @@ library(shinydashboard)
 
 source("breaking_ice.R")
 
+TEMPLATE_DOWNLOAD_URL='https://raw.githubusercontent.com/TimotheeMD/SWOG1801_reanalysis/main/CON.xlsx'
+
 # Define UI - version 0004
 
 # Adding an image - code from Maria
@@ -18,28 +20,36 @@ ui <- fluidPage(
   titlePanel("Breaking ICE"),
 
   fluidRow( 
-    column (8, 
+    column (8,
   box(
     title="Trial Data",  br(),
-    selectInput(
-      inputId = "cut",
-      label = "Select a trial",
-      choices = list(
-        "CONTACT-02-PFS" = "CONTACT-02-PFS",
-        "CONTACT-02-OS" = "CONTACT-02-OS"
+    fluidRow(
+      column(6,
+        selectInput(
+          inputId = "cut",
+          label = "Select a trial",
+          choices = list(
+            "CONTACT-02-PFS" = "CONTACT-02-PFS",
+            "CONTACT-02-OS" = "CONTACT-02-OS"
+          ),
+          selected = "CONTACT-02-PFS",
+          width = "100%"
+        ),
       ),
-      selected = "CONTACT-02-PFS",
-      width = "100%"
+      column(6,
+        fileInput("user_trial", tags$span("Or Load your own Trial Data", tags$a(href=TEMPLATE_DOWNLOAD_URL,"(Template)"), ":"), accept = c(".xlsx")),
+      )
     ),
-    fileInput("user_trial", "Or load your own trial data:", accept = c(".xlsx")),
-  ))
-  ,
-     column (4, 
+    width=12
+  )),
+  column (1, box()), # empty puffer
+  column (3, 
   box(
-    title="Breaking-ICE",
+    title="Breaking-ICE",br(),
     "Informative",br(),
     "Censoring",br(),
     "Exploration",br(),
+    width=12
   ))
   ),
   
