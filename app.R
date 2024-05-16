@@ -152,12 +152,7 @@ server <- function(input, output, session) {
   newFit <- reactive({
     survfit(Surv(x,y)~z, data=newXYZ())
   })
-  newStatistics <- reactive({
-    fit <- coxph(Surv(x,y)~z, data=newXYZ())
-    s <- summary(fit)
-    s
-  })
-  
+
   # output$plot <- renderPlot({
   #   ##then Kaplan-Meier Curve
   #   # par(mar = c(1, 1, 1, 1), xaxs = "i", yaxs = "i")
