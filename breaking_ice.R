@@ -4,6 +4,14 @@ library(rms)
 library(survminer)
 # library(plotly)
 
+
+make_levels <- function(df){
+  df$z <- factor(df$z)
+  levels(df$z) <- c('control','experiment')
+  df$z <- forcats::fct_relevel(df$z, 'experiment')
+  return(df)
+}
+
 getOriginal <- function(){
   
   ## First step, go on digitilzese and for each arm (important, use 100 as the maximum in y axis), you export an csv files on your Desktop (EXP for the experimental arm, and CON for the control arm)
@@ -68,7 +76,10 @@ processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
   y <- surv_data$status
   z <- surv_data$arm
   
-  return(list(xyz=list(x=x,y=y,z=z), est_E_OS=est_E_OS, est_C_OS=est_C_OS))
+  xyz <- data.frame(x=x,y=y,z=z)
+  xyz <- make_levels(xyz)
+
+  return(list(xyz=xyz, est_E_OS=est_E_OS, est_C_OS=est_C_OS))
 }
 
 original <- getOriginal()
@@ -180,21 +191,31 @@ newData <- function(time_frame_experimental=c(0,3),
   x <- newdata$time
   y <- newdata$status
   z <- newdata$treat
+
+  xyz <- data.frame(x=x,y=y,z=z)
+  xyz <- make_levels(xyz)
   
-  return( list(xyz=list(x=x,y=y,z=z)))
+  return( list(xyz=xyz))
 }
 
 plotCurves <- function(original, originalFit, newXYZ, newFit) {
   df <- bind_rows(original=original$xyz, simulated=newXYZ, .id='group')
+  print(levels(df$z))
+
   
   # g <- ggsurvplot(
   g <- ggsurvplot_combine(
     fit = list(original=originalFit, simulated=newFit),
     data = df,
     palette =
-      c("red", "#6699CC","orange", "green"),    # custom color palettes
+      c("#6699CC", "red", "green","orange"),    # custom color palettes
     legend.labs =
-      c("Docetaxel - Control", "Sotorasib - Experiment", 'simulated - control', 'simulated - Experiment'),
+      c("Original - Experiment", "Original - Control", 'Simulated - Experiment', 'Simulated - Control'),
+    # palette =
+    #   c("red", "#6699CC","orange", "green"),    # custom color palettes
+    # legend.labs =
+    #   c("Original - Control", "Original - Experiment", 'Simulated - Control', 'Simulated - Experiment'),
+      # c("Docetaxel - Control", "Sotorasib - Experiment", 'simulated - control', 'simulated - Experiment'),
     # originalFit,
     # data = original$xyz,
     # newFit(),
