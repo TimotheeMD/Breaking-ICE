@@ -213,7 +213,7 @@ plotCurves <- function(original, originalFit, newXYZ, newFit, colours) {
     palette = colours,
       # c("#6699CC", "red", "green","orange"),    # custom color palettes
     legend.labs =
-      c("Original - Experiment", "Original - Control", 'Simulated - Experiment', 'Simulated - Control'),
+      c("Original - Experiment", "Original - Control", 'Sensitivity - Experiment', 'Sensitivity - Control'),
     # palette =
     #   c("red", "#6699CC","orange", "green"),    # custom color palettes
     # legend.labs =
