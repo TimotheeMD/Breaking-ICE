@@ -244,7 +244,6 @@ plotCurves <- function(original, originalFit, newXYZ, newFit, colours) {
 }
 
 calculateRiskMat <- function(xyz, trisk){
-  
   xyz %>% mutate(
     t=cut(x, breaks=trisk, include.lowest=TRUE, labels=trisk[-length(trisk)])
     # nrisk=
@@ -258,8 +257,8 @@ calculateRiskMat <- function(xyz, trisk){
 }
 # calculateRiskMat(newXYZ$xyz, original$trisk)
 
-calculateCensorPerc <- function(original, newData, roundTo=1){
-  sim_riskmat <- calculateRiskMat(newXYZ$xyz, original$trisk)
+calculateCensorPerc <- function(original, newXYZ, roundTo=1){
+  sim_riskmat <- calculateRiskMat(newXYZ, original$trisk)
   dataframes <- list(
     "Original - Experiment"=original$est_E_OS$riskmat,
     "Original - Control"=original$est_C_OS$riskmat,
@@ -278,7 +277,7 @@ calculateCensorPerc <- function(original, newData, roundTo=1){
   return(ret)
 }
 
-# calculateCensorPerc(original, newData)
+calculateCensorPerc(original, newXYZ$xyz)
 
 quickRun <- function(){
   print("Quick Run")

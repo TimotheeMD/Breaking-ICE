@@ -243,7 +243,7 @@ server <- function(input, output, session) {
   })
   
   output$censor_perc_table <- renderTable({
-    calculateCensorPerc(userTrialData(), newData())
+    calculateCensorPerc(userTrialData(), newXYZ())
   })
   
   observeEvent(input$doReset, {
