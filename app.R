@@ -93,7 +93,7 @@ ui <- fluidPage(
       radioButtons("modelling_type_control", label = ("Modelling type"), 
                   choices = list("Toxicity", "Disappointment"), 
                   selected = "Disappointment"),
-      actionButton("doReset", "Reset All Parameters"),
+      actionButton("doReset", "Set All Parameters to Zero"),
 
       h3("Colours"),
       # palette =
@@ -242,11 +242,11 @@ server <- function(input, output, session) {
   
   observeEvent(input$doReset, {
     print("resetting")
-    updateSliderInput(session, "time_frame_experimental", value=c(0,3))
-    updateNumericInput(session, "Eperc", value=15)
+    updateSliderInput(session, "time_frame_experimental", value=c(0,0))
+    updateNumericInput(session, "Eperc", value=0)
     updateRadioButtons(session, "modelling_type_experimental", selected="Toxicity")
-    updateSliderInput(session, "time_frame_control", value=c(0,3))
-    updateNumericInput(session, "Cperc", value=15)
+    updateSliderInput(session, "time_frame_control", value=c(0,0))
+    updateNumericInput(session, "Cperc", value=0)
     updateRadioButtons(session, "modelling_type_control", selected="Disappointment")
   })
   
