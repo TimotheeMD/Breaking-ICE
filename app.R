@@ -21,12 +21,9 @@ ui <- fluidPage(
     fluidRow(
       column(6,
         selectInput(
-          inputId = "cut",
+          inputId = "prepared_trial",
           label = "Select a trial",
-          choices = list(
-            "CONTACT-02-PFS" = "CONTACT-02-PFS",
-            "CONTACT-02-OS" = "CONTACT-02-OS"
-          ),
+          choices = names(allDatasets),
           selected = "CONTACT-02-PFS",
           width = "100%"
         ),
@@ -147,7 +144,12 @@ server <- function(input, output, session) {
   userTrialData <- reactive({
     # do nothing if no file was uploaded
     if(! shiny::isTruthy(input$user_trial)){
-      getOriginal()
+      trial <- input$prepared_trial
+      if(trial %in% names(allDatasets)){
+        allDatasets[[trial]] %>% glimpse
+      }else{
+        getOriginal()
+      }
     }else{
       # ext <- tools::file_ext(input$user_trial$name)
       # switch(ext,

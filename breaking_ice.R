@@ -46,7 +46,9 @@ readCurvesFromExcel <- function(filename){
   E <- readxl::read_xlsx(filename, sheet='EXP')
   C <- readxl::read_xlsx(filename, sheet='CON')
   
-  return( processCurves(E, times$trisk, times$nrisk.E, C, times$nrisk.C) )
+  ret <- processCurves(E, times$trisk, times$nrisk.E, C, times$nrisk.C)
+  ret$name <- gsub("\\.xlsx|^Trial Data _ ","", basename(filename) )
+  return( ret )
 }
 
 # st <- readExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
@@ -81,6 +83,15 @@ processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
 
   return(list(xyz=xyz, est_E_OS=est_E_OS, est_C_OS=est_C_OS, trisk=trisk))
 }
+
+listDatasets <- function(folder='datasets'){
+  ## TODO does it need differen folder separator on windows?
+  filenames <- Sys.glob(paste0(folder,"/Trial Data _ *.xlsx"))
+  datasets <- lapply(filenames, readCurvesFromExcel)
+  names(datasets) <- sapply(datasets, function(x) x$name)
+  datasets
+}
+allDatasets <- listDatasets()
 
 original <- getOriginal()
 # original <- readCurvesFromExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
