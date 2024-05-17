@@ -7,3 +7,4 @@
 *.docx
 *.jpg
 .DS_Store
+!www/template.xlsx

@@ -7,6 +7,7 @@ library(colourpicker)
 source("breaking_ice.R")
 
 TEMPLATE_DOWNLOAD_URL='https://raw.githubusercontent.com/TimotheeMD/SWOG1801_reanalysis/main/CON.xlsx'
+TEMPLATE_DOWNLOAD_URL='template.xlsx'
 
 # Define UI
 
