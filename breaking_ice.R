@@ -79,7 +79,7 @@ processCurves <- function(E, trisk, nrisk.E, C, nrisk.C) {
   xyz <- data.frame(x=x,y=y,z=z)
   xyz <- make_levels(xyz)
 
-  return(list(xyz=xyz, est_E_OS=est_E_OS, est_C_OS=est_C_OS))
+  return(list(xyz=xyz, est_E_OS=est_E_OS, est_C_OS=est_C_OS, trisk=trisk))
 }
 
 original <- getOriginal()
@@ -229,6 +229,7 @@ plotCurves <- function(original, originalFit, newXYZ, newFit, colours) {
     conf.int = FALSE,          # Add confidence interval
     pval = FALSE,              # Add p-value
     risk.table = TRUE,        # Add risk table
+    # risk.table = "nrisk_cumcensor",        # Add risk table
     risk.table.col = "strata",  # Risk table color by groups
     # legend.labs =
     #   c("Docetaxel - Control", "Sotorasib - Experiment"),
@@ -242,6 +243,43 @@ plotCurves <- function(original, originalFit, newXYZ, newFit, colours) {
   )
 }
 
+calculateRiskMat <- function(xyz, trisk){
+  
+  xyz %>% mutate(
+    t=cut(x, breaks=trisk, include.lowest=TRUE, labels=trisk[-length(trisk)])
+    # nrisk=
+    ) %>% 
+    group_by(z, t) %>% summarise(censor.hat=sum(1-y), event.hat=sum(y)) %>% 
+    arrange(t) %>% mutate(
+      cumsum.censor=cumsum(coalesce(lag(censor.hat),0)),
+      cumsum.event=cumsum(coalesce(lag(event.hat),0)),
+      nrisk=sum(censor.hat)+sum(event.hat) - cumsum.censor - cumsum.event
+    ) %>% ungroup() %>% arrange(z, t)
+}
+# calculateRiskMat(newXYZ$xyz, original$trisk)
+
+calculateCensorPerc <- function(original, newData, roundTo=1){
+  sim_riskmat <- calculateRiskMat(newXYZ$xyz, original$trisk)
+  dataframes <- list(
+    "Original - Experiment"=original$est_E_OS$riskmat,
+    "Original - Control"=original$est_C_OS$riskmat,
+    "Sensitivity - Experiment"=sim_riskmat %>% filter(z=='experiment'),
+    "Sensitivity - Control"=sim_riskmat %>% filter(z=='control')
+  )
+  maxN <- max(sapply(dataframes, nrow))
+  ret <- bind_cols(trisk=original$trisk[1:maxN], lapply(dataframes,
+    function(df){
+      res <- df %>% mutate(censor.perc=round(censor.hat / nrisk * 100,roundTo)) %>% pull(censor.perc)
+      length(res) <- maxN
+      # res[is.na(res)] <- max(res, na.rm=TRUE)
+      res
+    }
+  ))
+  return(ret)
+}
+
+# calculateCensorPerc(original, newData)
+
 quickRun <- function(){
   print("Quick Run")
   newXYZ <- newData(
@@ -249,11 +287,13 @@ quickRun <- function(){
     modellingTypeControl = 'Toxicity',
   )
   newFit <- survfit(Surv(x,y)~z, data=newXYZ$xyz)
-  plotCurves(original, originalFit, newXYZ, newFit)
+  # tables <- ggsurvtable(newFit, data=newXYZ$xyz, bre)$risk.table$data
+  g <- plotCurves(original, originalFit, newXYZ, newFit)
+  g
 }
 
 ## uncomment for quick development
-# print(quickRun())
+print(quickRun())
 
 # (simulateToxicity(original$est_C_OS$IPD, time_frame=c(0,3), perc=90 )) %>% head
 
