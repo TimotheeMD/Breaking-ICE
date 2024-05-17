@@ -117,12 +117,14 @@ ui <- fluidPage(
       # verbatimTextOutput("statistics"),
       h3("Statistical outputs (Cox)"),
       tags$style(HTML("
-        #metrics {
+        #metrics,#censor_perc_table {
           display: flex;
           justify-content: center;
         }
       ")),
-      tableOutput("metrics")
+      tableOutput("metrics"),
+      h3("Percent Censored"),
+      tableOutput("censor_perc_table")
       #box(
       #  title="Results",  br(),
       #  "exp(z):", textOutput("statistics_z"),
@@ -238,6 +240,10 @@ server <- function(input, output, session) {
   
   output$metrics <- renderTable({
     newStatistics()
+  })
+  
+  output$censor_perc_table <- renderTable({
+    calculateCensorPerc(userTrialData(), newData())
   })
   
   observeEvent(input$doReset, {
