@@ -288,7 +288,7 @@ calculateCensorPerc <- function(original, newXYZ, roundTo=1){
   return(ret)
 }
 
-calculateCensorPerc(original, newXYZ$xyz)
+# calculateCensorPerc(original, newXYZ$xyz)
 
 quickRun <- function(){
   print("Quick Run")
