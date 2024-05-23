@@ -12,9 +12,6 @@ TEMPLATE_DOWNLOAD_URL='template.xlsx'
 # Define UI
 
 ui <- fluidPage(
-  
-  titlePanel("Breaking ICE"),
-
   fluidRow( 
     column (8,
   box(
