@@ -93,8 +93,8 @@ listDatasets <- function(folder='datasets'){
 }
 allDatasets <- listDatasets()
 
-original <- getOriginal()
-# original <- readCurvesFromExcel(filename='./Trial Data _ CONTACT-02-PFS.xlsx')
+# original <- getOriginal()
+original <- readCurvesFromExcel(filename='./datasets/Trial Data _ CONTACT-02-PFS.xlsx')
 
 originalFit <- survfit(Surv(x,y)~z, data = original$xyz)
 
