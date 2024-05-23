@@ -303,7 +303,7 @@ quickRun <- function(){
 }
 
 ## uncomment for quick development
-print(quickRun())
+# print(quickRun())
 
 # (simulateToxicity(original$est_C_OS$IPD, time_frame=c(0,3), perc=90 )) %>% head
 
