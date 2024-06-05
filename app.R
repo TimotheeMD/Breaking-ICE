@@ -11,6 +11,23 @@ TEMPLATE_DOWNLOAD_URL='template.xlsx'
 
 # Define UI
 
+tags$head(
+  tags$style(HTML("
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .container-fluid {
+      height: 100%;
+    }
+    .row {
+      height: 100%;
+    }
+  "))
+)
+
+
 ui <- fluidPage(
   
   fluidRow( 
@@ -55,7 +72,7 @@ ui <- fluidPage(
       h4(div("Experimental arm", style = "color: #6699CC")),
       sliderInput(
         inputId = "time_frame_experimental",
-        label = "Time Frame (where censoring has to be modified)",
+        label = "Time Frame (when censoring is modified)",
         min = 0,
         max = ceiling(max(original$xyz$x)),
         value = c(0,3),
@@ -75,7 +92,7 @@ ui <- fluidPage(
       h4(div("Control arm", style = "color: red")),
       sliderInput(
         inputId = "time_frame_control",
-        label = "Time Frame (where censoring has to be modified)",
+        label = "Time Frame (when censoring is modified)",
         min = 0,
         max = ceiling(max(original$xyz$x)),
         value = c(0,3),
@@ -121,7 +138,7 @@ ui <- fluidPage(
         }
       ")),
       tableOutput("metrics"),
-      h3("Censored patients between time intervals"),
+      h3("Censored patients between each time interval (%)"),
       tableOutput("censor_perc_table")
       #box(
       #  title="Results",  br(),
@@ -215,8 +232,8 @@ server <- function(input, output, session) {
       function(xyz){
         fit <- coxph(Surv(x,y)~z, data=xyz)
         s <- summary(fit)
-        data.frame("HR" = s$coefficients[2], "p-value" = s$coefficients[5],
-                   "CI Low" = s$conf.int[3], "CI High" = s$conf.int[4]
+        data.frame("HR" = 1/s$coefficients[2], "p-value" = s$coefficients[5],
+                   "CI Low" = 1/s$conf.int[4], "CI High" = 1/s$conf.int[3]
         )
       }
     ), .id = "Model")
