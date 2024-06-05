@@ -8,3 +8,4 @@
 *.jpg
 .DS_Store
 !www/template.xlsx
+rsconnect
