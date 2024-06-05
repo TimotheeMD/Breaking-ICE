@@ -277,7 +277,7 @@ calculateCensorPerc <- function(original, newXYZ, roundTo=1){
     "Sensitivity - Control"=sim_riskmat %>% filter(z=='control')
   )
   maxN <- max(sapply(dataframes, nrow))
-  ret <- bind_cols(Time=original$trisk[1:maxN], lapply(dataframes,
+  ret <- bind_cols(Time=as.integer(original$trisk[1:maxN]), lapply(dataframes,
     function(df){
       res <- df %>% mutate(censor.perc=round(censor.hat / nrisk * 100,roundTo)) %>% pull(censor.perc)
       length(res) <- maxN
