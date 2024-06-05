@@ -13,8 +13,6 @@ TEMPLATE_DOWNLOAD_URL='template.xlsx'
 
 ui <- fluidPage(
   
-  titlePanel("Breaking ICE"),
-
   fluidRow( 
     column (8,
   box(
@@ -50,12 +48,14 @@ ui <- fluidPage(
     
     sidebarPanel(
       h3("Sensitivity analysis"),   
-      "Change the parameters to see how it affects the survival analysis on the left",br(),
+      "Change the parameters to see how it affects the survival analysis",br(),
+      "1- 'Toxicity' modelling modify censored patients into events",br(),
+      "2- 'Disappointment' modelling modify the time of censoring into late censoring",br(),
       # h4("Experimental arm"),
       h4(div("Experimental arm", style = "color: #6699CC")),
       sliderInput(
         inputId = "time_frame_experimental",
-        label = "Time Frame",
+        label = "Time Frame (where censoring has to be modified)",
         min = 0,
         max = ceiling(max(original$xyz$x)),
         value = c(0,3),
@@ -63,7 +63,7 @@ ui <- fluidPage(
       ),
       numericInput(
         inputId = "Eperc",
-        label = "Censoring (%)",
+        label = "Percentage of censored patients to be modified",
         value = 15,
         min = 0,
         max = 100
@@ -75,7 +75,7 @@ ui <- fluidPage(
       h4(div("Control arm", style = "color: red")),
       sliderInput(
         inputId = "time_frame_control",
-        label = "Time Frame",
+        label = "Time Frame (where censoring has to be modified)",
         min = 0,
         max = ceiling(max(original$xyz$x)),
         value = c(0,3),
@@ -83,7 +83,7 @@ ui <- fluidPage(
       ),
       numericInput(
         inputId = "Cperc",
-        label = "Censoring (%)",
+        label = "Percentage of censored patients to be modified",
         value = 15,
         min = 0,
         max = 100
@@ -93,7 +93,7 @@ ui <- fluidPage(
                   selected = "Disappointment"),
       actionButton("doReset", "Set All Parameters to Zero"),
 
-      h3("Colours"),
+      h3("Colours and Transparency"),
       # palette =
       #   c("#6699CC", "red", "green","orange"),    # custom color palettes
       # legend.labs =
@@ -121,7 +121,7 @@ ui <- fluidPage(
         }
       ")),
       tableOutput("metrics"),
-      h3("Percent Censored"),
+      h3("Censored patients between time intervals"),
       tableOutput("censor_perc_table")
       #box(
       #  title="Results",  br(),
