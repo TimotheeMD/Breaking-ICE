@@ -29,7 +29,6 @@ tags$head(
 
 
 ui <- fluidPage(
-  
   fluidRow( 
     column (8,
   box(
