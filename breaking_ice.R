@@ -223,7 +223,7 @@ plotCurves <- function(original, originalFit, newXYZ, newFit, colours) {
   
   # g <- ggsurvplot(
   g <- ggsurvplot_combine(
-    fit = list(original=originalFit, simulated=newFit),
+    fit = list(simulated=newFit, original=originalFit),
     data = df,
     palette = colours,
       # c("#6699CC", "red", "green","orange"),    # custom color palettes
