@@ -48,6 +48,10 @@ readCurvesFromExcel <- function(filename){
   
   ret <- processCurves(E, times$trisk, times$nrisk.E, C, times$nrisk.C)
   ret$name <- gsub("\\.xlsx|^Trial Data _ ","", basename(filename) )
+  if('Sensitivity' %in% sheets){
+    ret$simulationDefaults <- readxl::read_xlsx(filename, sheet='Sensitivity')
+    print(ret$simulationDefaults)
+  }
   return( ret )
 }
 

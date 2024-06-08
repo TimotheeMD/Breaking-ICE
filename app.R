@@ -170,7 +170,24 @@ server <- function(input, output, session) {
     if(! shiny::isTruthy(input$user_trial)){
       trial <- input$prepared_trial
       if(trial %in% names(allDatasets)){
-        allDatasets[[trial]] %>% glimpse
+        ret <- allDatasets[[trial]] # %>% glimpse
+        
+        f <- if('simulationDefaults' %in% ls(ret)){
+          print('has simulationDefaults')
+          str(ret$simulationDefaults)
+          function(x,y, def){
+            z <- (ret$simulationDefaults) %>% filter(Parameter == x) %>% pull(y)
+            if(length(z)) z else def
+          }
+        } else function(x,y,def) def
+        
+        updateSliderInput(session, "time_frame_experimental", value=c(0,f('time_frame_max', 'EXP', 3)))
+        updateNumericInput(session, "Eperc", value=f('percentage', 'EXP', 15))
+        updateRadioButtons(session, "modelling_type_experimental", selected=f('modelling_type', 'EXP', 'Toxicity'))
+        updateSliderInput(session, "time_frame_control", value=c(0,f('time_frame_max', 'CON', 3)))
+        updateNumericInput(session, "Cperc", value=f('percentage', 'CON', 15))
+        updateRadioButtons(session, "modelling_type_control", selected=f('modelling_type', 'CON', "Disappointment"))
+        ret
       }else{
         getOriginal()
       }
