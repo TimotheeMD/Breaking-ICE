@@ -11,24 +11,31 @@ TEMPLATE_DOWNLOAD_URL='template.xlsx'
 
 # Define UI
 
-tags$head(
-  tags$style(HTML("
+
+
+ui <- fluidPage(
+  tags$head(
+    tags$style(HTML("
     body, html {
       height: 100%;
       margin: 0;
       padding: 0;
     }
+    /* this adds a large white block - let's comment it out */
+    /*
     .container-fluid {
       height: 100%;
     }
     .row {
       height: 100%;
     }
+    */
+    /* this aligns the bottom of the popup panel with 2.5em above the bottom of the colour input field */
+    .colourpicker-panel {
+      bottom: 2.5em;
+    }
   "))
-)
-
-
-ui <- fluidPage(
+  ),
   fluidRow( 
     column (8,
   box(
