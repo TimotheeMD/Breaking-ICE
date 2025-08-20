@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.xlsx
+*.pdf
+*.docx
+*.jpg
+.DS_Store
+!www/template.xlsx
+rsconnect
